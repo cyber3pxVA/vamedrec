@@ -2,6 +2,37 @@
 
 A hybrid medication reconciliation application combining AI-powered reasoning with deterministic validation methods.
 
+---
+
+## ⚠️ **IMPORTANT DISCLAIMER**
+
+**🚨 THIS IS A DEVELOPMENT PROTOTYPE - NOT FOR PRODUCTION USE 🚨**
+
+**THIS SOFTWARE IS FOR RESEARCH, DEVELOPMENT, AND EDUCATIONAL PURPOSES ONLY.**
+
+**DO NOT USE THIS APPLICATION FOR:**
+- ❌ Real-time clinical decision making
+- ❌ Production healthcare environments
+- ❌ Patient care without clinician review
+- ❌ Any situation where medication errors could cause harm
+- ❌ Replacement of licensed healthcare professionals' judgment
+
+**CRITICAL WARNINGS:**
+- This is **EXPERIMENTAL SOFTWARE** under active development
+- AI/LLM outputs may contain errors, hallucinations, or incomplete information
+- No clinical validation or regulatory approval has been obtained
+- Not compliant with HIPAA, FDA, or other healthcare regulations
+- No warranty or guarantee of accuracy is provided
+- **ALL outputs must be reviewed by qualified healthcare professionals**
+
+**BY USING THIS SOFTWARE, YOU ACKNOWLEDGE:**
+- You understand this is a proof-of-concept demonstration
+- You will not use it for real patient care without appropriate oversight
+- You accept full responsibility for any consequences of its use
+- The developers assume no liability for clinical outcomes
+
+---
+
 ## 🎯 Purpose
 
 Automates medication reconciliation by:

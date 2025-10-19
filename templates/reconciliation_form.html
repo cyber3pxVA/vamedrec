@@ -44,6 +44,36 @@
             font-size: 1.1em;
         }
         
+        .warning-banner {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 20px 30px;
+            border-left: 6px solid #c92a2a;
+            margin: 0;
+            text-align: left;
+        }
+        
+        .warning-banner h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .warning-banner p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        .warning-banner strong {
+            font-weight: 700;
+        }
+        
+        .warning-banner ul {
+            margin: 8px 0 8px 20px;
+            font-size: 0.9em;
+        }
+        
         .form-container {
             padding: 40px;
         }
@@ -245,11 +275,17 @@
         }
     </style>
 </head>
-<body>
-    <div class="container">
+<body>    <div class="container">
         <div class="header">
             <h1>🏥 VAMedRec - Clinical Reconciliation</h1>
             <p>3-Stage Medication Reconciliation Pipeline</p>
+        </div>
+        
+        <div class="warning-banner">
+            <h3>⚠️ DEVELOPMENT PROTOTYPE - NOT FOR PRODUCTION USE</h3>
+            <p><strong>THIS IS EXPERIMENTAL SOFTWARE FOR RESEARCH PURPOSES ONLY.</strong></p>
+            <p><strong>DO NOT USE FOR:</strong> Real-time clinical decisions, production healthcare, or patient care without clinician review.</p>
+            <p><strong>ALL OUTPUTS MUST BE REVIEWED BY QUALIFIED HEALTHCARE PROFESSIONALS.</strong></p>
         </div>
         
         <div class="form-container">

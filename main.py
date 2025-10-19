@@ -54,6 +54,28 @@ def api_documentation():
             .nav a:hover {
                 text-decoration: underline;
             }
+            .warning {
+                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 6px solid #c92a2a;
+                margin: 20px 0;
+            }
+            .warning h3 {
+                margin: 0 0 10px 0;
+                font-size: 1.2em;
+            }
+            .warning p {
+                margin: 8px 0;
+                line-height: 1.5;
+            }
+            .warning ul {
+                margin: 10px 0;
+            }
+            .warning strong {
+                font-weight: 700;
+            }
             .container {
                 background: white;
                 padding: 40px;
@@ -99,6 +121,20 @@ def api_documentation():
             </div>
             
             <h1>🏥 VAMedRec - API Documentation</h1>
+            
+            <div class="warning">
+                <h3>⚠️ DEVELOPMENT PROTOTYPE - NOT FOR PRODUCTION USE</h3>
+                <p><strong>THIS IS EXPERIMENTAL SOFTWARE FOR RESEARCH AND DEVELOPMENT PURPOSES ONLY.</strong></p>
+                <p><strong>DO NOT USE FOR:</strong></p>
+                <ul>
+                    <li>❌ Real-time clinical decision making</li>
+                    <li>❌ Production healthcare environments</li>
+                    <li>❌ Patient care without clinician review</li>
+                    <li>❌ Any situation where medication errors could cause harm</li>
+                </ul>
+                <p><strong>ALL OUTPUTS MUST BE REVIEWED BY QUALIFIED HEALTHCARE PROFESSIONALS.</strong> No warranty or guarantee of accuracy is provided. The developers assume no liability for clinical outcomes.</p>
+            </div>
+            
             <p>
                 A hybrid system combining AI-powered clinical reasoning with deterministic safety checks
                 for comprehensive VA medication reconciliation.

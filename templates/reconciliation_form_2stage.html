@@ -76,6 +76,42 @@
             border-bottom: 3px solid #007acc;
         }
         
+        /* Warning Banner */
+        .warning-banner {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 20px 30px;
+            border-left: 6px solid #c92a2a;
+            margin: 0;
+            text-align: left;
+        }
+        
+        .warning-banner h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .warning-banner p {
+            margin: 5px 0;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        .warning-banner strong {
+            font-weight: 700;
+            text-decoration: underline;
+        }
+        
+        .warning-banner ul {
+            margin: 10px 0 10px 20px;
+            font-size: 0.95em;
+        }
+        
+        .warning-banner ul li {
+            margin: 5px 0;
+        }
+        
         .pipeline-banner h2 {
             color: #1e3c72;
             margin-bottom: 15px;
@@ -490,6 +526,18 @@
             </div>
             <h1>🏥 VAMedRec - 2-Stage Pipeline</h1>
             <p>NLP Extraction → AI Reconciliation</p>
+        </div>
+        
+        <div class="warning-banner">
+            <h3>⚠️ DEVELOPMENT PROTOTYPE - NOT FOR PRODUCTION USE</h3>
+            <p><strong>THIS IS EXPERIMENTAL SOFTWARE FOR RESEARCH AND DEVELOPMENT PURPOSES ONLY.</strong></p>
+            <p><strong>DO NOT USE FOR:</strong></p>
+            <ul>
+                <li>❌ Real-time clinical decision making</li>
+                <li>❌ Production healthcare environments</li>
+                <li>❌ Patient care without clinician review</li>
+            </ul>
+            <p><strong>ALL OUTPUTS MUST BE REVIEWED BY QUALIFIED HEALTHCARE PROFESSIONALS.</strong> The developers assume no liability for clinical outcomes. This system may contain errors, hallucinations, or incomplete information.</p>
         </div>
         
         <div class="pipeline-banner">
