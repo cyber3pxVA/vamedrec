@@ -72,6 +72,223 @@ class ReportGenerator:
         logger.info("Report generated successfully")
         return report
     
+    def generate_html_report(self, reconciliation_result: Dict) -> str:
+        """
+        Generate HTML report from reconciliation results.
+        
+        Args:
+            reconciliation_result: Output from ReconciliationEngine
+        
+        Returns:
+            HTML-formatted report string
+        """
+        logger.info("Generating HTML reconciliation report")
+        
+        summary = reconciliation_result.get('summary', {})
+        matches = reconciliation_result.get('matches', [])
+        discrepancies = reconciliation_result.get('discrepancies', [])
+        additions = reconciliation_result.get('additions', [])
+        discontinuations = reconciliation_result.get('discontinuations', [])
+        ambiguities = reconciliation_result.get('ambiguities', [])
+        
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Calculate attention score
+        attention_score = (summary.get('discrepancy_count', 0) * 3) + \
+                         (summary.get('ambiguity_count', 0) * 5) + \
+                         (summary.get('discontinuation_count', 0) * 2)
+        
+        if attention_score > 10:
+            attention_level = '<span style="color: #d32f2f; font-weight: bold;">🔴 HIGH - Immediate Review Required</span>'
+        elif attention_score > 5:
+            attention_level = '<span style="color: #f57c00; font-weight: bold;">🟡 MEDIUM - Review Recommended</span>'
+        else:
+            attention_level = '<span style="color: #388e3c; font-weight: bold;">🟢 LOW - Standard Review</span>'
+        
+        html = f"""
+        <div class="html-report">
+            <div class="report-header">
+                <h2>🏥 Medication Reconciliation Report</h2>
+                <p class="timestamp">Generated: {timestamp}</p>
+            </div>
+            
+            <div class="summary-section">
+                <h3>📊 Executive Summary</h3>
+                <div class="summary-grid">
+                    <div class="summary-stat">
+                        <span class="stat-label">Prior Medications:</span>
+                        <span class="stat-value">{summary.get('total_prior_meds', 0)}</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-label">Current Medications:</span>
+                        <span class="stat-value">{summary.get('total_current_meds', 0)}</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-label">Matched:</span>
+                        <span class="stat-value success">{summary.get('matched_count', 0)}</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-label">Discrepancies:</span>
+                        <span class="stat-value warning">{summary.get('discrepancy_count', 0)}</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-label">Additions:</span>
+                        <span class="stat-value info">{summary.get('addition_count', 0)}</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-label">Discontinuations:</span>
+                        <span class="stat-value danger">{summary.get('discontinuation_count', 0)}</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-label">Ambiguities:</span>
+                        <span class="stat-value danger">{summary.get('ambiguity_count', 0)}</span>
+                    </div>
+                </div>
+                <div class="attention-level">
+                    <strong>Review Priority:</strong> {attention_level}
+                </div>
+                {f'<div class="clinical-notes"><strong>Clinical Notes:</strong> {summary.get("clinical_notes", "")}</div>' if summary.get("clinical_notes") else ''}
+            </div>
+        """
+        
+        # Matched Medications
+        if matches:
+            html += """
+            <div class="report-section success-section">
+                <h3>✅ Matched Medications</h3>
+                <p class="section-desc">These medications appear in both lists without significant changes.</p>
+                <div class="med-list">
+            """
+            for match in matches:
+                html += f"""
+                <div class="med-item">
+                    <div class="med-name">{match.get('drug_name', 'Unknown')}</div>
+                    <div class="med-details">
+                        <span><strong>Prior:</strong> {match.get('prior_dose', 'N/A')} {match.get('prior_frequency', '')}</span>
+                        <span><strong>Current:</strong> {match.get('current_dose', 'N/A')} {match.get('current_frequency', '')}</span>
+                    </div>
+                    {f'<div class="med-notes">{match.get("notes", "")}</div>' if match.get('notes') else ''}
+                </div>
+                """
+            html += "</div></div>"
+        
+        # Discrepancies
+        if discrepancies:
+            html += """
+            <div class="report-section warning-section">
+                <h3>⚠️ Discrepancies - REVIEW REQUIRED</h3>
+                <p class="section-desc">Medications with dose or frequency changes that need verification.</p>
+                <div class="med-list">
+            """
+            for disc in discrepancies:
+                html += f"""
+                <div class="med-item highlight-warning">
+                    <div class="med-name">{disc.get('drug_name', 'Unknown')}</div>
+                    <div class="med-details">
+                        <span><strong>Prior:</strong> {disc.get('prior_dose', 'N/A')} {disc.get('prior_frequency', '')}</span>
+                        <span><strong>Current:</strong> {disc.get('current_dose', 'N/A')} {disc.get('current_frequency', '')}</span>
+                    </div>
+                    <div class="discrepancy-type"><strong>Type:</strong> {disc.get('discrepancy_type', 'Unknown')}</div>
+                    {f'<div class="med-notes"><strong>Notes:</strong> {disc.get("notes", "")}</div>' if disc.get('notes') else ''}
+                    <div class="action-required">⚠️ ACTION: Verify with prescriber</div>
+                </div>
+                """
+            html += "</div></div>"
+        
+        # Additions
+        if additions:
+            html += """
+            <div class="report-section info-section">
+                <h3>➕ New Medications</h3>
+                <p class="section-desc">Medications that appear only in the current list.</p>
+                <div class="med-list">
+            """
+            for add in additions:
+                html += f"""
+                <div class="med-item">
+                    <div class="med-name">{add.get('drug_name', 'Unknown')}</div>
+                    <div class="med-details">
+                        <span><strong>Dose:</strong> {add.get('dose', 'N/A')}</span>
+                        <span><strong>Frequency:</strong> {add.get('frequency', 'N/A')}</span>
+                    </div>
+                    {f'<div class="med-notes">{add.get("notes", "")}</div>' if add.get('notes') else ''}
+                </div>
+                """
+            html += "</div></div>"
+        
+        # Discontinuations
+        if discontinuations:
+            html += """
+            <div class="report-section danger-section">
+                <h3>🛑 Discontinued Medications</h3>
+                <p class="section-desc">Medications that were stopped or removed from the regimen.</p>
+                <div class="med-list">
+            """
+            for disc in discontinuations:
+                html += f"""
+                <div class="med-item">
+                    <div class="med-name">{disc.get('drug_name', 'Unknown')}</div>
+                    <div class="med-details">
+                        <span><strong>Reason:</strong> {disc.get('reason', 'Not specified')}</span>
+                    </div>
+                    {f'<div class="med-notes">{disc.get("notes", "")}</div>' if disc.get('notes') else ''}
+                </div>
+                """
+            html += "</div></div>"
+        
+        # Ambiguities
+        if ambiguities:
+            html += """
+            <div class="report-section danger-section">
+                <h3>❓ Ambiguities - URGENT REVIEW</h3>
+                <p class="section-desc">Unclear or contradictory medication information requiring immediate clarification.</p>
+                <div class="med-list">
+            """
+            for amb in ambiguities:
+                html += f"""
+                <div class="med-item highlight-danger">
+                    <div class="med-name">{amb.get('drug_name', 'Unknown')}</div>
+                    <div class="med-details">
+                        <span><strong>Issue:</strong> {amb.get('issue', 'Unknown')}</span>
+                    </div>
+                    {f'<div class="med-notes"><strong>Notes:</strong> {amb.get("notes", "")}</div>' if amb.get('notes') else ''}
+                    <div class="action-required">🚨 URGENT: Requires clarification</div>
+                </div>
+                """
+            html += "</div></div>"
+        
+        # Action Items
+        action_items = []
+        if discrepancies:
+            action_items.append(f"• Verify {len(discrepancies)} dose/frequency discrepancies with prescriber")
+        if ambiguities:
+            action_items.append(f"• Clarify {len(ambiguities)} ambiguous medication entries URGENTLY")
+        if discontinuations:
+            action_items.append(f"• Confirm {len(discontinuations)} medication discontinuations")
+        if additions:
+            action_items.append(f"• Document {len(additions)} new medication additions")
+        
+        if action_items:
+            html += """
+            <div class="report-section action-section">
+                <h3>📋 Recommended Actions</h3>
+                <ul class="action-list">
+            """
+            for item in action_items:
+                html += f"<li>{item}</li>"
+            html += "</ul></div>"
+        
+        html += """
+            <div class="report-footer">
+                <p><strong>System:</strong> VAMedRec v1.0 - VA Medication Reconciliation</p>
+                <p><strong>⚠️ Important:</strong> This is an automated analysis. All findings must be reviewed by a qualified healthcare professional.</p>
+            </div>
+        </div>
+        """
+        
+        logger.info("HTML report generated successfully")
+        return html
+    
     def _generate_header(self, result: Dict) -> str:
         """Generate report header."""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

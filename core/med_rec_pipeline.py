@@ -115,20 +115,22 @@ class MedRecPipeline:
         logger.info(f"✓ Identified {reconciliation_result['summary']['addition_count']} additions")
         logger.info(f"✓ Identified {reconciliation_result['summary']['discontinuation_count']} discontinuations")
         logger.info(f"✓ Identified {reconciliation_result['summary']['ambiguity_count']} ambiguities")
-        
-        # Generate report
+          # Generate report
         logger.info("\n[REPORT GENERATION]")
         logger.info("-" * 40)
         
         markdown_report = self.report_generator.generate_report(reconciliation_result)
+        html_report = self.report_generator.generate_html_report(reconciliation_result)
         
         logger.info("✓ Generated markdown report")
+        logger.info("✓ Generated HTML report")
         
         # Compile final result
         final_result = {
             "medication_list": med_list.dict(),
             "reconciliation": reconciliation_result,
             "report_markdown": markdown_report,
+            "report_html": html_report,
             "pipeline_metadata": {
                 "pipeline_version": "1.0",
                 "stages_completed": ["extraction", "normalization", "reconciliation"],

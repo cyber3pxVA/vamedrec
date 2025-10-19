@@ -360,23 +360,24 @@ def reconcile_clinical():
             encounter_id=encounter_id,
             prior_text_source=prior_text_source,
             current_text_source=current_text_source
-        )
-        
-        # Format response based on output format
+        )        # Format response based on output format
         if output_format == "json":
             return jsonify({
                 "success": True,
                 "pipeline": "clinical_nlp_3_stage",
                 "medication_list": result["medication_list"],
                 "reconciliation": result["reconciliation"],
+                "report_html": result["report_html"],
                 "metadata": result["pipeline_metadata"]
             })
         else:
-            # Return markdown report
+            # Return HTML report WITH medication list data for frontend display
             return jsonify({
                 "success": True,
                 "pipeline": "clinical_nlp_3_stage",
                 "report_markdown": result["report_markdown"],
+                "report_html": result["report_html"],
+                "medication_list": result["medication_list"],  # Include medication list for Stage 1 display
                 "summary": result["reconciliation"]["summary"],
                 "metadata": result["pipeline_metadata"]
             })

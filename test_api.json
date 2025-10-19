@@ -1,0 +1,5 @@
+{
+  "prior_text": "1. Metformin 500mg PO BID\n2. Aspirin 81mg daily",
+  "current_text": "1. Metformin 500mg PO BID\n2. Lisinopril 10mg PO daily\n3. Patient stopped taking Aspirin",
+  "output_format": "markdown"
+}
