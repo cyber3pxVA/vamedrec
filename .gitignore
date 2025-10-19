@@ -1,0 +1,80 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Environment Variables - CRITICAL: Never commit these!
+.env
+.env.*
+!.env.example
+*.env
+.env.local
+.env.production
+.env.development
+.env.test
+*.key
+*.secret
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Project specific
+*.db
+*.sqlite
+*.sqlite3
+
+# VA Specific - DO NOT COMMIT
+*_phi_*
+*_pii_*
+patient_data/
+test_data_real/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

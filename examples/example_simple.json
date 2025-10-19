@@ -1,0 +1,15 @@
+{
+  "mode": "simple",
+  "baseline_meds": [
+    "Aspirin 81mg tablet by mouth daily",
+    "Metformin 500mg tablet by mouth twice daily",
+    "Lisinopril 10mg tablet by mouth daily"
+  ],
+  "reference_meds": [
+    "Aspirin 81mg daily",
+    "Metformin 1000mg daily",
+    "Ibuprofen 400mg three times daily"
+  ],
+  "baseline_label": "Inpatient on Admission",
+  "reference_label": "Outpatient Home Meds"
+}

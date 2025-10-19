@@ -1,0 +1,35 @@
+{
+  "mode": "comprehensive",
+  "baseline_meds": [
+    "Aspirin 81mg tablet by mouth daily",
+    "Metformin 500mg tablet by mouth twice daily",
+    "Lisinopril 10mg tablet by mouth daily",
+    "Insulin glargine 20 units subcutaneous at bedtime",
+    "Pantoprazole 40mg tablet by mouth daily"
+  ],
+  "reference_meds": [
+    "Aspirin 81mg daily",
+    "Metformin 1000mg daily",
+    "Ibuprofen 400mg three times daily as needed",
+    "Lisinopril 5mg daily",
+    "Omeprazole 20mg daily"
+  ],
+  "baseline_label": "Inpatient on Admission",
+  "reference_label": "Outpatient Home Meds",
+  "patient_context": {
+    "demographics": {
+      "age": 65,
+      "sex": "Male"
+    },
+    "allergies": ["Penicillin"],
+    "labs": {
+      "egfr": 45,
+      "creatinine": 1.8
+    },
+    "problems": [
+      "Type 2 Diabetes Mellitus",
+      "Hypertension",
+      "Chronic Kidney Disease Stage 3"
+    ]
+  }
+}

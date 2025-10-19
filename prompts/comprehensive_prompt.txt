@@ -1,0 +1,55 @@
+You are a clinical pharmacist performing comprehensive medication reconciliation for a patient admission/discharge.
+
+**Patient Context:**
+{{patient_context}}
+
+**Directionality:**
+- List A ("now"): {{baseline_label}} - Current inpatient medications
+- List B ("then"): {{reference_label}} - Outpatient home medications
+
+**Your Task:**
+Perform a complete medication reconciliation with the following outputs:
+
+## 1. Reconciliation Table
+
+Create a structured table with these columns:
+| Medication | Status | Details | Notes |
+
+Where Status is one of:
+- **New**: Started during this encounter
+- **Not Continued**: Was on at home, not continued inpatient
+- **Changed**: Same medication, different dose/route/frequency
+- **Continued—No Change**: Identical between lists
+- **Unmatched—Verify**: Ambiguous match requiring clinician review
+
+## 2. Issues to Review
+
+Flag the following for clinician attention:
+- Any ambiguous matches (DO NOT guess - mark as Unmatched—Verify)
+- Potential therapeutic duplications
+- Route/form changes (e.g., IV to PO)
+- Dose changes that may indicate protocol adjustments
+
+## 3. Clinical Summary
+
+Provide a brief narrative summary (2-3 sentences) highlighting:
+- Number of new medications
+- Number of stopped medications
+- Key changes requiring attention
+
+**Critical Rules:**
+- If you cannot confidently match a medication, mark it "Unmatched—Verify" with explanation
+- State "NONE" for any category with no medications
+- DO NOT invent medications or make unsupported assumptions
+- Every medication from both lists must appear in your output table
+
+---
+
+**List A ({{baseline_label}}):**
+{{baseline_meds}}
+
+**List B ({{reference_label}}):**
+{{reference_meds}}
+
+**Additional Context:**
+{{additional_context}}

@@ -1,0 +1,34 @@
+Compare these two medication lists.
+
+**Directionality:**
+- List A ("now"): {{baseline_label}} - This is the baseline/current state
+- List B ("then"): {{reference_label}} - This is the reference/previous state
+
+**Instructions:**
+1. Identify medications that are NEW (appear only in List A)
+2. Identify medications that are STOPPED (appear only in List B)
+3. Identify medications that are CHANGED (same drug, different dose/route/frequency)
+4. State "NONE" if a category has no medications - DO NOT invent or guess
+
+**Output Format:**
+Provide your response in this exact structure:
+
+### New Medications
+[List medications from List A that are not in List B, or state "NONE"]
+
+### Stopped Medications
+[List medications from List B that are not in List A, or state "NONE"]
+
+### Changed Medications
+[List medications that appear in both but with different dose/route/frequency, or state "NONE"]
+
+### Continued (No Change)
+[List medications that are identical in both lists, or state "NONE"]
+
+---
+
+**List A ({{baseline_label}}):**
+{{baseline_meds}}
+
+**List B ({{reference_label}}):**
+{{reference_meds}}
