@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAMedRec - Clinical Reconciliation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .form-container {
+            padding: 40px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-section h2 {
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        
+        .label-hint {
+            font-weight: normal;
+            color: #888;
+            font-size: 0.85em;
+            margin-left: 5px;
+        }
+        
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+        
+        .textarea-large {
+            min-height: 300px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #555;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .btn-example {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn-example:hover {
+            background: #ffb300;
+        }
+        
+        .result-container {
+            display: none;
+            margin-top: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result-container.show {
+            display: block;
+        }
+        
+        .result-container h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .result-markdown {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            max-height: 600px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+        
+        .success-badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 VAMedRec - Clinical Reconciliation</h1>
+            <p>3-Stage Medication Reconciliation Pipeline</p>
+        </div>
+        
+        <div class="form-container">
+            <form id="reconciliationForm">
+                <div class="two-column">
+                    <div class="form-section">
+                        <h2>📋 Prior Medications</h2>
+                        <div class="form-group">
+                            <label for="priorText">
+                                Prior/Home Medication List
+                                <span class="label-hint">(Copy and paste clinical text)</span>
+                            </label>
+                            <textarea 
+                                id="priorText" 
+                                name="priorText" 
+                                placeholder="Example:&#10;1. Metformin 500mg PO BID&#10;2. Lisinopril 10mg PO daily&#10;3. Aspirin 81mg daily&#10;4. Atorvastatin 20mg QHS"
+                                class="textarea-large"
+                            ></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h2>📝 Current Medications</h2>
+                        <div class="form-group">
+                            <label for="currentText">
+                                Current Clinical Notes
+                                <span class="label-hint">(Copy and paste from EHR)</span>
+                            </label>
+                            <textarea 
+                                id="currentText" 
+                                name="currentText" 
+                                placeholder="Example:&#10;Continue metformin 500mg BID&#10;Increased lisinopril to 20mg daily&#10;Patient stopped aspirin 3 weeks ago&#10;Continue atorvastatin 20mg QHS&#10;Started insulin glargine 10 units SQ QHS"
+                                class="textarea-large"
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>ℹ️ Optional Information</h2>
+                    <div class="two-column">
+                        <div class="form-group">
+                            <label for="patientId">Patient ID</label>
+                            <input type="text" id="patientId" name="patientId" placeholder="VA-12345678">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="encounterId">Encounter ID</label>
+                            <input type="text" id="encounterId" name="encounterId" placeholder="ENC-2025-10-19-001">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="priorSource">Prior Text Source</label>
+                            <input type="text" id="priorSource" name="priorSource" placeholder="Home Medication List" value="Home Medication List">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="currentSource">Current Text Source</label>
+                            <input type="text" id="currentSource" name="currentSource" placeholder="Progress Note" value="Progress Note">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="outputFormat">Output Format</label>
+                        <select id="outputFormat" name="outputFormat">
+                            <option value="markdown">Markdown Report (Recommended)</option>
+                            <option value="json">JSON (Full Data)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" class="btn-example" onclick="loadExample()">📄 Load Example</button>
+                    <button type="button" class="btn-secondary" onclick="clearForm()">🗑️ Clear</button>
+                    <button type="submit" class="btn-primary">🚀 Reconcile Medications</button>
+                </div>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing reconciliation... This may take a few seconds.</p>
+            </div>
+            
+            <div class="result-container" id="resultContainer">
+                <h3>
+                    📊 Reconciliation Results
+                    <span class="success-badge" id="successBadge">✓ Complete</span>
+                </h3>
+                <div class="result-markdown" id="resultContent"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('reconciliationForm');
+        const loading = document.getElementById('loading');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultContent = document.getElementById('resultContent');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = {
+                prior_text: document.getElementById('priorText').value,
+                current_text: document.getElementById('currentText').value,
+                patient_id: document.getElementById('patientId').value || undefined,
+                encounter_id: document.getElementById('encounterId').value || undefined,
+                prior_text_source: document.getElementById('priorSource').value || 'Prior Medication List',
+                current_text_source: document.getElementById('currentSource').value || 'Current Clinical Note',
+                output_format: document.getElementById('outputFormat').value
+            };
+            
+            // Validate
+            if (!formData.prior_text && !formData.current_text) {
+                alert('Please enter at least one medication list (prior or current).');
+                return;
+            }
+            
+            // Show loading
+            loading.classList.add('show');
+            resultContainer.classList.remove('show');
+            
+            try {
+                // Call API
+                const response = await fetch('/reconcile_clinical', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                // Hide loading
+                loading.classList.remove('show');
+                
+                if (result.success) {
+                    // Show results
+                    resultContainer.classList.add('show');
+                    
+                    if (formData.output_format === 'markdown') {
+                        resultContent.textContent = result.report_markdown;
+                    } else {
+                        resultContent.textContent = JSON.stringify(result, null, 2);
+                    }
+                    
+                    // Scroll to results
+                    resultContainer.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    // Show error
+                    resultContainer.classList.add('show');
+                    resultContent.innerHTML = `<div class="error-message">
+                        <strong>Error:</strong> ${result.error || 'Unknown error occurred'}<br><br>
+                        ${result.traceback ? '<pre>' + result.traceback + '</pre>' : ''}
+                    </div>`;
+                    resultContainer.scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (error) {
+                loading.classList.remove('show');
+                resultContainer.classList.add('show');
+                resultContent.innerHTML = `<div class="error-message">
+                    <strong>Network Error:</strong> ${error.message}<br><br>
+                    Make sure the API server is running on http://localhost:5000
+                </div>`;
+                resultContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+        
+        function loadExample() {
+            document.getElementById('priorText').value = `PRIOR MEDICATION LIST (Home Medications):
+1. Metformin 500mg tablet by mouth twice daily - for diabetes
+2. Lisinopril 10mg tablet by mouth once daily - for hypertension
+3. Aspirin 81mg tablet by mouth once daily - for cardiovascular protection
+4. Atorvastatin 20mg tablet by mouth at bedtime - for cholesterol`;
+            
+            document.getElementById('currentText').value = `CURRENT MEDICATIONS (From Clinic Visit 10/19/2025):
+
+Patient continues metformin 500mg PO BID for diabetes control.
+
+Increased lisinopril to 20mg PO daily due to elevated BP readings.
+
+Patient stopped taking aspirin 3 weeks ago due to GI upset.
+
+Continue atorvastatin 20mg QHS.
+
+Started insulin glargine 10 units subcutaneous at bedtime for better glycemic control.
+
+Patient mentioned he might start warfarin but we're still considering it.`;
+            
+            document.getElementById('patientId').value = 'VA-12345678';
+            document.getElementById('encounterId').value = 'ENC-2025-10-19-001';
+        }
+        
+        function clearForm() {
+            form.reset();
+            resultContainer.classList.remove('show');
+        }
+    </script>
+</body>
+</html>

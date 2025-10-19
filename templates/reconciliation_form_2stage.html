@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAMedRec - 2-Stage Pipeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        /* Pipeline Info Banner */
+        .pipeline-banner {
+            background: linear-gradient(135deg, #e8f4f8 0%, #d5e5ff 100%);
+            padding: 25px;
+            border-bottom: 3px solid #007acc;
+        }
+        
+        .pipeline-banner h2 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .pipeline-stages-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+        }
+        
+        .stage-info-box {
+            flex: 1;
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #007acc;
+        }
+        
+        .stage-info-box h3 {
+            color: #007acc;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .stage-info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .stage-info-box li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .stage-info-box li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        /* Form Container */
+        .form-container {
+            padding: 40px;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .form-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 250px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: vertical;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #555;
+        }
+        
+        .btn-example {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        /* Progress Indicator */
+        .progress-section {
+            display: none;
+            padding: 30px;
+            background: #f8f9fa;
+            border-top: 3px solid #667eea;
+        }
+        
+        .progress-section.show {
+            display: block;
+        }
+        
+        .progress-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 1.3em;
+        }
+        
+        .progress-stages {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+        
+        .progress-line {
+            position: absolute;
+            top: 30px;
+            left: 25%;
+            right: 25%;
+            height: 3px;
+            background: #e0e0e0;
+            z-index: 0;
+        }
+        
+        .progress-line-fill {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 1s ease;
+        }
+        
+        .progress-stage {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stage-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #999;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            transition: all 0.5s;
+        }
+        
+        .stage-circle.active {
+            background: #667eea;
+            color: white;
+            animation: pulse 1.5s infinite;
+            transform: scale(1.1);
+        }
+        
+        .stage-circle.complete {
+            background: #28a745;
+            color: white;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .stage-label {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stage-label.active {
+            color: #667eea;
+        }
+        
+        .stage-label.complete {
+            color: #28a745;
+        }
+        
+        .stage-description {
+            font-size: 0.85em;
+            color: #999;
+        }
+        
+        /* Results Section */
+        .results-section {
+            display: none;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .results-section.show {
+            display: block;
+        }
+        
+        .stage-result {
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stage-result h3 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .stage-badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+        
+        .stage-badge.stage1 {
+            background: #6c757d;
+        }
+        
+        .stage-badge.stage2 {
+            background: #007acc;
+        }
+        
+        /* Medications Grid */
+        .medications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .med-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        
+        .med-card.negated {
+            border-left: 4px solid #dc3545;
+            background: #fff5f5;
+        }
+        
+        .med-card.uncertain {
+            border-left: 4px solid #ffc107;
+            background: #fffef5;
+        }
+        
+        .med-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .med-detail {
+            font-size: 0.9em;
+            color: #666;
+            margin: 4px 0;
+        }
+        
+        .med-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .med-badge.negated {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .med-badge.uncertain {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* Final Report */
+        .final-report {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .report-content {
+            white-space: pre-wrap;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            line-height: 1.6;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        /* Loading Spinner */
+        .loading-message {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-box {
+            background: #fee;
+            border: 2px solid #fcc;
+            color: #c33;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 968px) {
+            .two-column, .pipeline-stages-info, .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 VAMedRec - 2-Stage Pipeline</h1>
+            <p>NLP Extraction → AI Reconciliation</p>
+        </div>
+        
+        <div class="pipeline-banner">
+            <h2>📊 How the 2-Stage Pipeline Works</h2>
+            <div class="pipeline-stages-info">
+                <div class="stage-info-box">
+                    <h3>🔬 Stage 1: NLP Extraction</h3>
+                    <ul>
+                        <li>Extracts medication names</li>
+                        <li>Identifies doses & frequencies</li>
+                        <li>Detects negation (stopped/discontinued)</li>
+                        <li>Finds temporal information</li>
+                        <li>100% deterministic (no AI guessing)</li>
+                    </ul>
+                </div>
+                <div class="stage-info-box">
+                    <h3>🤖 Stage 2: AI Reconciliation</h3>
+                    <ul>
+                        <li>Compares prior vs current medications</li>
+                        <li>Identifies matches & discrepancies</li>
+                        <li>Detects dose changes</li>
+                        <li>Finds new additions & discontinuations</li>
+                        <li>Flags ambiguities for review</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <form id="reconciliationForm">
+                <div class="two-column">
+                    <div class="form-section">
+                        <h3>📋 Prior Medications</h3>
+                        <textarea 
+                            id="priorText" 
+                            placeholder="Paste prior/home medication list here...&#10;&#10;Example:&#10;1. Metformin 500mg PO BID&#10;2. Lisinopril 10mg PO daily&#10;3. Aspirin 81mg daily"
+                        ></textarea>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>📝 Current Medications</h3>
+                        <textarea 
+                            id="currentText" 
+                            placeholder="Paste current clinical notes here...&#10;&#10;Example:&#10;Continue metformin 500mg BID&#10;Increased lisinopril to 20mg daily&#10;Patient stopped aspirin"
+                        ></textarea>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" class="btn-example" onclick="loadExample()">📄 Load Example</button>
+                    <button type="button" class="btn-secondary" onclick="clearForm()">🗑️ Clear</button>
+                    <button type="submit" class="btn-primary">🚀 Start 2-Stage Reconciliation</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Progress Section -->
+        <div class="progress-section" id="progressSection">
+            <h2 class="progress-title">Processing Pipeline...</h2>
+            
+            <div class="progress-stages">
+                <div class="progress-line">
+                    <div class="progress-line-fill" id="progressFill"></div>
+                </div>
+                
+                <div class="progress-stage">
+                    <div class="stage-circle" id="stage1Circle">1</div>
+                    <div class="stage-label" id="stage1Label">Stage 1</div>
+                    <div class="stage-description">NLP Extraction</div>
+                </div>
+                
+                <div class="progress-stage">
+                    <div class="stage-circle" id="stage2Circle">2</div>
+                    <div class="stage-label" id="stage2Label">Stage 2</div>
+                    <div class="stage-description">AI Reconciliation</div>
+                </div>
+            </div>
+            
+            <div class="loading-message" id="loadingMessage">
+                <div class="spinner"></div>
+                <p id="loadingText">Initializing pipeline...</p>
+            </div>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <!-- Stage 1 Results -->
+            <div class="stage-result" id="stage1Results">
+                <h3>
+                    <span class="stage-badge stage1">STAGE 1</span>
+                    NLP Extraction Results
+                </h3>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-number" id="priorCount">0</div>
+                        <div class="stat-label">Prior Meds</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="currentCount">0</div>
+                        <div class="stat-label">Current Meds</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="negatedCount">0</div>
+                        <div class="stat-label">Discontinued</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="uncertainCount">0</div>
+                        <div class="stat-label">Uncertain</div>
+                    </div>
+                </div>
+                
+                <h4>Extracted Medications:</h4>
+                <div class="medications-grid" id="extractedMeds"></div>
+            </div>
+            
+            <!-- Stage 2 Results -->
+            <div class="stage-result final-report" id="stage2Results">
+                <h3>
+                    <span class="stage-badge stage2">STAGE 2</span>
+                    AI Reconciliation Report
+                </h3>
+                <div class="report-content" id="reportContent"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('reconciliationForm');
+        const progressSection = document.getElementById('progressSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const loadingText = document.getElementById('loadingText');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const priorText = document.getElementById('priorText').value;
+            const currentText = document.getElementById('currentText').value;
+            
+            if (!priorText && !currentText) {
+                alert('Please enter at least one medication list.');
+                return;
+            }
+            
+            // Show progress section
+            progressSection.classList.add('show');
+            resultsSection.classList.remove('show');
+            
+            // Reset progress
+            resetProgress();
+            
+            // Stage 1: NLP Extraction
+            await runStage1(priorText, currentText);
+            
+            // Stage 2: AI Reconciliation
+            await runStage2(priorText, currentText);
+        });
+        
+        function resetProgress() {
+            document.getElementById('stage1Circle').classList.remove('active', 'complete');
+            document.getElementById('stage2Circle').classList.remove('active', 'complete');
+            document.getElementById('stage1Label').classList.remove('active', 'complete');
+            document.getElementById('stage2Label').classList.remove('active', 'complete');
+            document.getElementById('progressFill').style.width = '0%';
+        }
+        
+        async function runStage1(priorText, currentText) {
+            // Activate Stage 1
+            document.getElementById('stage1Circle').classList.add('active');
+            document.getElementById('stage1Label').classList.add('active');
+            loadingText.textContent = '🔬 Stage 1: Extracting medications with NLP...';
+            
+            // Simulate NLP processing (in real implementation, this would call extraction endpoint)
+            await sleep(1500);
+            
+            // Complete Stage 1
+            document.getElementById('stage1Circle').classList.remove('active');
+            document.getElementById('stage1Circle').classList.add('complete');
+            document.getElementById('stage1Label').classList.remove('active');
+            document.getElementById('stage1Label').classList.add('complete');
+            document.getElementById('progressFill').style.width = '50%';
+        }
+        
+        async function runStage2(priorText, currentText) {
+            // Activate Stage 2
+            document.getElementById('stage2Circle').classList.add('active');
+            document.getElementById('stage2Label').classList.add('active');
+            loadingText.textContent = '🤖 Stage 2: AI-powered reconciliation...';
+            
+            try {
+                // Call actual API
+                const response = await fetch('/reconcile_clinical', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prior_text: priorText,
+                        current_text: currentText,
+                        output_format: 'markdown'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // Complete Stage 2
+                document.getElementById('stage2Circle').classList.remove('active');
+                document.getElementById('stage2Circle').classList.add('complete');
+                document.getElementById('stage2Label').classList.remove('active');
+                document.getElementById('stage2Label').classList.add('complete');
+                document.getElementById('progressFill').style.width = '100%';
+                
+                // Wait a moment for visual effect
+                await sleep(500);
+                
+                // Hide progress, show results
+                progressSection.classList.remove('show');
+                
+                if (result.success) {
+                    displayResults(result);
+                } else {
+                    displayError(result.error, result.traceback);
+                }
+                
+            } catch (error) {
+                displayError(error.message);
+            }
+        }
+        
+        function displayResults(result) {
+            // Extract stats from result
+            const summary = result.summary || {};
+            const medications = result.medication_list?.medications || [];
+            
+            // Update stats
+            const priorMeds = medications.filter(m => m.list_source === 'prior');
+            const currentMeds = medications.filter(m => m.list_source === 'current');
+            const negatedMeds = medications.filter(m => m.is_negated);
+            const uncertainMeds = medications.filter(m => m.is_uncertain);
+            
+            document.getElementById('priorCount').textContent = priorMeds.length;
+            document.getElementById('currentCount').textContent = currentMeds.length;
+            document.getElementById('negatedCount').textContent = negatedMeds.length;
+            document.getElementById('uncertainCount').textContent = uncertainMeds.length;
+            
+            // Display extracted medications
+            const extractedMedsDiv = document.getElementById('extractedMeds');
+            extractedMedsDiv.innerHTML = '';
+            
+            medications.forEach(med => {
+                const card = document.createElement('div');
+                card.className = 'med-card';
+                if (med.is_negated) card.classList.add('negated');
+                if (med.is_uncertain) card.classList.add('uncertain');
+                
+                let badges = '';
+                if (med.is_negated) badges += '<span class="med-badge negated">DISCONTINUED</span>';
+                if (med.is_uncertain) badges += '<span class="med-badge uncertain">UNCERTAIN</span>';
+                
+                card.innerHTML = `
+                    <div class="med-name">${med.drug_name_norm}</div>
+                    ${badges}
+                    <div class="med-detail"><strong>Dose:</strong> ${med.dose_strength || '?'}${med.dose_unit || ''}</div>
+                    <div class="med-detail"><strong>Frequency:</strong> ${med.frequency || 'N/A'}</div>
+                    <div class="med-detail"><strong>Route:</strong> ${med.route || 'N/A'}</div>
+                    <div class="med-detail"><strong>Source:</strong> ${med.list_source}</div>
+                `;
+                
+                extractedMedsDiv.appendChild(card);
+            });
+            
+            // Display final report
+            document.getElementById('reportContent').textContent = result.report_markdown;
+            
+            // Show results section
+            resultsSection.classList.add('show');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function displayError(error, traceback) {
+            progressSection.classList.remove('show');
+            resultsSection.classList.add('show');
+            
+            document.getElementById('stage1Results').style.display = 'none';
+            document.getElementById('stage2Results').innerHTML = `
+                <div class="error-box">
+                    <h3>❌ Error Occurred</h3>
+                    <p><strong>Error:</strong> ${error}</p>
+                    ${traceback ? '<pre>' + traceback + '</pre>' : ''}
+                </div>
+            `;
+            
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        function loadExample() {
+            document.getElementById('priorText').value = `PRIOR MEDICATION LIST (Home Medications):
+1. Metformin 500mg tablet by mouth twice daily - for diabetes
+2. Lisinopril 10mg tablet by mouth once daily - for hypertension
+3. Aspirin 81mg tablet by mouth once daily - for cardiovascular protection
+4. Atorvastatin 20mg tablet by mouth at bedtime - for cholesterol`;
+            
+            document.getElementById('currentText').value = `CURRENT MEDICATIONS (From Clinic Visit):
+
+Patient continues metformin 500mg PO BID for diabetes control.
+
+Increased lisinopril to 20mg PO daily due to elevated BP readings.
+
+Patient stopped taking aspirin 3 weeks ago due to GI upset.
+
+Continue atorvastatin 20mg QHS.
+
+Started insulin glargine 10 units subcutaneous at bedtime for better glycemic control.`;
+        }
+        
+        function clearForm() {
+            form.reset();
+            progressSection.classList.remove('show');
+            resultsSection.classList.remove('show');
+        }
+    </script>
+</body>
+</html>

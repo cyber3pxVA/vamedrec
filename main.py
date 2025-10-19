@@ -3,7 +3,7 @@ VAMedRec - Web API Entry Point
 Handles HTTP requests and responses for medication reconciliation service.
 """
 
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string, render_template
 from typing import Dict
 import config
 from core.reconciler import MedicationReconciler
@@ -80,6 +80,12 @@ def home():
             <h2>🔌 Endpoints</h2>
             
             <div class="endpoint">
+                <span class="method">GET</span>
+                <code>/form</code>
+                <p><strong>🎨 Interactive Web Form</strong> - Copy/paste medication lists for reconciliation</p>
+            </div>
+            
+            <div class="endpoint">
                 <span class="method">POST</span>
                 <code>/reconcile</code>
                 <p>Perform medication reconciliation</p>
@@ -95,6 +101,18 @@ def home():
                 <span class="method">GET</span>
                 <code>/health</code>
                 <p>Check API health status</p>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method">GET</span>
+                <code>/pipeline</code>
+                <p>🎨 2-Stage Pipeline Web Interface (NEW!)</p>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method">GET</span>
+                <code>/form</code>
+                <p>📝 Simple Web Form</p>
             </div>
 
             <h2>📝 Example Request</h2>
@@ -148,6 +166,18 @@ def health():
         "service": "VAMedRec",
         "version": "1.0.0"
     }), 200
+
+
+@app.route('/form', methods=['GET'])
+def reconciliation_form():
+    """Serve the clinical reconciliation form."""
+    return render_template('reconciliation_form.html')
+
+
+@app.route('/pipeline', methods=['GET'])
+def pipeline_form():
+    """Serve the 2-stage pipeline visualization form."""
+    return render_template('reconciliation_form_2stage.html')
 
 
 @app.route('/reconcile', methods=['POST'])

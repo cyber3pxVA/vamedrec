@@ -192,6 +192,44 @@ class ModelEngine:
         except Exception as e:
             raise RuntimeError(f"LLM API call failed: {str(e)}")
     
+    def generate(self, prompt: str, system_message: str = None) -> str:
+        """
+        Generic method to generate text from a prompt.
+        Used by the reconciliation engine for custom prompts.
+        
+        Args:
+            prompt: The prompt text
+            system_message: Optional custom system message
+        
+        Returns:
+            LLM response text
+        """
+        if system_message is None:
+            system_message = ("You are a clinical pharmacist expert in medication reconciliation. "
+                            "You are precise, evidence-based, and never guess or hallucinate information.")
+        
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": system_message
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+            )
+            
+            return response.choices[0].message.content
+        
+        except Exception as e:
+            raise RuntimeError(f"LLM API call failed: {str(e)}")
+    
     def validate_no_hallucination(self, response: str, input_meds: List[str]) -> bool:
         """
         Simple validation check: ensure response doesn't mention medications
