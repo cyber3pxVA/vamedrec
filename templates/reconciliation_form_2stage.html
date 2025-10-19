@@ -34,6 +34,31 @@
             text-align: center;
         }
         
+        .nav-bar {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 30px;
+            margin: -30px -30px 20px -30px;
+            text-align: right;
+        }
+        
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .nav-bar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-bar a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
         .header h1 {
             font-size: 2.2em;
             margin-bottom: 10px;
@@ -457,8 +482,12 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <div class="container">        <div class="header">
+            <div class="nav-bar">
+                <a href="/" class="active">🏠 Home</a>
+                <a href="/docs">📚 API Docs</a>
+                <a href="/form">📝 Simple Form</a>
+            </div>
             <h1>🏥 VAMedRec - 2-Stage Pipeline</h1>
             <p>NLP Extraction → AI Reconciliation</p>
         </div>

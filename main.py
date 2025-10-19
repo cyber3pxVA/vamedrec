@@ -19,11 +19,17 @@ clinical_pipeline = MedRecPipeline()
 
 @app.route('/', methods=['GET'])
 def home():
-    """Home page with API documentation."""
+    """Home page - interactive 2-stage pipeline UI."""
+    return render_template('reconciliation_form_2stage.html')
+
+
+@app.route('/docs', methods=['GET'])
+def api_documentation():
+    """API documentation page."""
     html = """    <!DOCTYPE html>
     <html>
     <head>
-        <title>VAMedRec - VA Medication Reconciliation API</title>
+        <title>VAMedRec - API Documentation</title>
         <style>
             body {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
@@ -31,6 +37,22 @@ def home():
                 margin: 40px auto;
                 padding: 20px;
                 background: #f5f5f5;
+            }
+            .nav {
+                background: #007acc;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px 8px 0 0;
+                margin: -40px -40px 20px -40px;
+            }
+            .nav a {
+                color: white;
+                text-decoration: none;
+                margin-right: 20px;
+                font-weight: bold;
+            }
+            .nav a:hover {
+                text-decoration: underline;
             }
             .container {
                 background: white;
@@ -71,18 +93,28 @@ def home():
         </style>
     </head>    <body>
         <div class="container">
-            <h1>🏥 VAMedRec - VA Medication Reconciliation API</h1>
+            <div class="nav">
+                <a href="/">🏠 Home (Interactive UI)</a>
+                <a href="/docs">📚 API Documentation</a>
+            </div>
+            
+            <h1>🏥 VAMedRec - API Documentation</h1>
             <p>
                 A hybrid system combining AI-powered clinical reasoning with deterministic safety checks
                 for comprehensive VA medication reconciliation.
-            </p>
-
-            <h2>🔌 Endpoints</h2>
+            </p>            <h2>🔌 Endpoints</h2>
+            
+            <div class="endpoint" style="border-left: 4px solid #28a745; background: #e8f8f0;">
+                <span class="method" style="background: #28a745;">GET</span>
+                <code>/</code>
+                <p><strong>🏠 Interactive UI</strong> - Main landing page with 2-stage pipeline visualizer</p>
+                <p><a href="/" style="color: #28a745; font-weight: bold;">👉 Go to home page</a></p>
+            </div>
             
             <div class="endpoint">
                 <span class="method">GET</span>
                 <code>/form</code>
-                <p><strong>🎨 Interactive Web Form</strong> - Copy/paste medication lists for reconciliation</p>
+                <p><strong>📝 Simple Web Form</strong> - Basic copy/paste interface</p>
             </div>
             
             <div class="endpoint">
@@ -101,18 +133,6 @@ def home():
                 <span class="method">GET</span>
                 <code>/health</code>
                 <p>Check API health status</p>
-            </div>
-            
-            <div class="endpoint">
-                <span class="method">GET</span>
-                <code>/pipeline</code>
-                <p>🎨 2-Stage Pipeline Web Interface (NEW!)</p>
-            </div>
-            
-            <div class="endpoint">
-                <span class="method">GET</span>
-                <code>/form</code>
-                <p>📝 Simple Web Form</p>
             </div>
 
             <h2>📝 Example Request</h2>
@@ -170,14 +190,8 @@ def health():
 
 @app.route('/form', methods=['GET'])
 def reconciliation_form():
-    """Serve the clinical reconciliation form."""
+    """Serve the simple clinical reconciliation form."""
     return render_template('reconciliation_form.html')
-
-
-@app.route('/pipeline', methods=['GET'])
-def pipeline_form():
-    """Serve the 2-stage pipeline visualization form."""
-    return render_template('reconciliation_form_2stage.html')
 
 
 @app.route('/reconcile', methods=['POST'])
@@ -345,7 +359,7 @@ def not_found(e):
     """Handle 404 errors."""
     return jsonify({
         "error": "Endpoint not found",
-        "available_endpoints": ["/", "/health", "/reconcile", "/reconcile_clinical"]
+        "available_endpoints": ["/", "/docs", "/health", "/reconcile", "/reconcile_clinical", "/form"]
     }), 404
 
 
@@ -365,11 +379,11 @@ if __name__ == '__main__':
     except ValueError as e:
         print(f"❌ Configuration error: {e}")
         exit(1)
-    
-    # Run Flask app
+      # Run Flask app
     print(f"\n🚀 Starting Medication Reconciliation API")
     print(f"📍 Server: http://{config.FLASK_HOST}:{config.FLASK_PORT}")
-    print(f"📖 Documentation: http://localhost:{config.FLASK_PORT}/")
+    print(f"🏠 Interactive UI: http://localhost:{config.FLASK_PORT}/")
+    print(f"📖 API Documentation: http://localhost:{config.FLASK_PORT}/docs")
     print(f"\nPress CTRL+C to stop\n")
     
     app.run(
