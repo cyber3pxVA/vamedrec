@@ -152,8 +152,7 @@ class ClinicalExtractor:
                 med_event = self._create_medication_event(
                     ent,
                     doc,
-                    list_source
-                )
+                    list_source                )
                 if med_event:
                     medication_events.append(med_event)
         
@@ -168,15 +167,22 @@ class ClinicalExtractor:
         
         # Common medication pattern: drug name + dose + unit + frequency
         # Example: "Metformin 500mg PO BID"
-        med_pattern = r'([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)\s+(\d+(?:\.\d+)?)\s*(mg|mcg|g|ml|units?|iu)\s+(?:(PO|IV|IM|SQ|subq|oral|by mouth)\s+)?([A-Z]+|once|twice|three times|daily|nightly|at bedtime)?'
+        # Look for: capitalized drug name followed immediately by dose
+        med_pattern = r'\b([A-Z][a-z]+(?:ol|in|il|ax|ex|pril|statin|formin|cycline|cillin|azole|zepam|oprazole)?)\s+(\d+(?:\.\d+)?)\s*(mg|mcg|g|ml|units?|iu)\s*(?:(PO|IV|IM|SQ|subq|oral|by mouth)\s+)?([A-Z]+|once|twice|three times|daily|nightly|at bedtime)?'
         
         # Split text into sentences
         sentences = text.split('\n')
         
         for sent in sentences:
-            # Check for negation markers
-            is_negated = any(marker in sent.lower() for marker in ['stopped', 'discontinued', 'no longer', 'd/c', 'dc'])
-            is_uncertain = any(marker in sent.lower() for marker in ['might', 'maybe', 'considering', 'possible'])
+            # Check for negation markers in the sentence
+            is_negated = any(marker in sent.lower() for marker in [
+                'stopped', 'discontinued', 'no longer', 'd/c', 'dc', 
+                'stopped taking', 'quit', 'ceased'
+            ])
+            is_uncertain = any(marker in sent.lower() for marker in [
+                'might', 'maybe', 'considering', 'possible', 'possibly',
+                'may start', 'might start', 'consider'
+            ])
             
             # Find medication matches
             matches = re.finditer(med_pattern, sent, re.IGNORECASE)
