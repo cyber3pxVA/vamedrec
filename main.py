@@ -7,12 +7,14 @@ from flask import Flask, request, jsonify, render_template_string
 from typing import Dict
 import config
 from core.reconciler import MedicationReconciler
+from core.med_rec_pipeline import MedRecPipeline
 
 # Initialize Flask app
 app = Flask(__name__)
 
-# Initialize reconciler
+# Initialize reconcilers
 reconciler = MedicationReconciler()
+clinical_pipeline = MedRecPipeline()
 
 
 @app.route('/', methods=['GET'])
@@ -81,6 +83,12 @@ def home():
                 <span class="method">POST</span>
                 <code>/reconcile</code>
                 <p>Perform medication reconciliation</p>
+            </div>
+
+            <div class="endpoint">
+                <span class="method">POST</span>
+                <code>/reconcile_clinical</code>
+                <p>Clinical NLP-powered reconciliation (3-stage pipeline)</p>
             </div>
 
             <div class="endpoint">
@@ -224,12 +232,90 @@ def reconcile():
         }), 500
 
 
+@app.route('/reconcile_clinical', methods=['POST'])
+def reconcile_clinical():
+    """
+    Clinical NLP-powered reconciliation endpoint (3-stage pipeline).
+    
+    Expected JSON body:
+    {
+        "prior_text": "Free text of prior/home medication list",
+        "current_text": "Free text of current clinical notes",
+        "patient_id": "VA-12345678",  // optional
+        "encounter_id": "ENC-2025-10-19-001",  // optional
+        "prior_text_source": "Home Medication List",  // optional
+        "current_text_source": "Progress Note",  // optional
+        "output_format": "markdown" | "json"  // optional, default: markdown
+    }
+    """
+    try:
+        # Parse request
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        # Extract required fields
+        prior_text = data.get("prior_text", "")
+        current_text = data.get("current_text", "")
+        
+        # Validate inputs
+        if not prior_text and not current_text:
+            return jsonify({
+                "error": "At least one text field (prior_text or current_text) is required"
+            }), 400
+        
+        # Extract optional fields
+        patient_id = data.get("patient_id")
+        encounter_id = data.get("encounter_id")
+        prior_text_source = data.get("prior_text_source", "Prior Medication List")
+        current_text_source = data.get("current_text_source", "Current Clinical Note")
+        output_format = data.get("output_format", "markdown")
+        
+        # Run the full 3-stage pipeline
+        result = clinical_pipeline.run_full_pipeline(
+            prior_text=prior_text,
+            current_text=current_text,
+            patient_id=patient_id,
+            encounter_id=encounter_id,
+            prior_text_source=prior_text_source,
+            current_text_source=current_text_source
+        )
+        
+        # Format response based on output format
+        if output_format == "json":
+            return jsonify({
+                "success": True,
+                "pipeline": "clinical_nlp_3_stage",
+                "medication_list": result["medication_list"],
+                "reconciliation": result["reconciliation"],
+                "metadata": result["pipeline_metadata"]
+            })
+        else:
+            # Return markdown report
+            return jsonify({
+                "success": True,
+                "pipeline": "clinical_nlp_3_stage",
+                "report_markdown": result["report_markdown"],
+                "summary": result["reconciliation"]["summary"],
+                "metadata": result["pipeline_metadata"]
+            })
+    
+    except Exception as e:
+        import traceback
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }), 500
+
+
 @app.errorhandler(404)
 def not_found(e):
     """Handle 404 errors."""
     return jsonify({
         "error": "Endpoint not found",
-        "available_endpoints": ["/", "/health", "/reconcile"]
+        "available_endpoints": ["/", "/health", "/reconcile", "/reconcile_clinical"]
     }), 404
 
 

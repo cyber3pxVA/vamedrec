@@ -1,0 +1,9 @@
+{
+  "prior_text": "PRIOR MEDICATION LIST (Home Medications):\n1. Metformin 500mg tablet by mouth twice daily - for diabetes\n2. Lisinopril 10mg tablet by mouth once daily - for hypertension\n3. Aspirin 81mg tablet by mouth once daily - for cardiovascular protection\n4. Atorvastatin 20mg tablet by mouth at bedtime - for cholesterol",
+  "current_text": "CURRENT MEDICATIONS (From Clinic Visit 10/19/2025):\n\nPatient continues metformin 500mg PO BID for diabetes control.\n\nIncreased lisinopril to 20mg PO daily due to elevated BP readings.\n\nPatient stopped taking aspirin 3 weeks ago due to GI upset.\n\nContinue atorvastatin 20mg QHS.\n\nStarted insulin glargine 10 units subcutaneous at bedtime for better glycemic control.\n\nPatient mentioned he might start warfarin but we're still considering it.",
+  "patient_id": "VA-12345678",
+  "encounter_id": "ENC-2025-10-19-001",
+  "prior_text_source": "Home Medication List",
+  "current_text_source": "Primary Care Progress Note",
+  "output_format": "markdown"
+}
