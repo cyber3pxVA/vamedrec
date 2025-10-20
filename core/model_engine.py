@@ -176,9 +176,39 @@ class ModelEngine:
         """
         if self.skip_llm:
             # Return deterministic stub for testing environments
-            return (
-                "{\n  \"matched\": [],\n  \"discrepancies\": [],\n  \"additions\": [],\n  \"discontinuations\": [],\n  \"ambiguities\": [],\n  \"summary\": {\n    \"total_prior_meds\": 0,\n    \"total_current_meds\": 0,\n    \"matched_count\": 0,\n    \"discrepancy_count\": 0,\n    \"addition_count\": 0,\n    \"discontinuation_count\": 0,\n    \"ambiguity_count\": 0,\n    \"clinical_notes\": \"LLM skipped (stub response).\"\n  }\n}"
-            )
+            stub_response = {
+                "matched": [],
+                "discrepancies": [],
+                "additions": [],
+                "discontinuations": [],
+                "ambiguities": [],
+                "summary": {
+                    "total_prior_meds": 0,
+                    "total_current_meds": 0,
+                    "matched_count": 0,
+                    "discrepancy_count": 0,
+                    "addition_count": 0,
+                    "discontinuation_count": 0,
+                    "ambiguity_count": 0,
+                    "clinical_notes": "LLM skipped (stub response - SKIP_LLM mode enabled)."
+                },
+                "narrative": {
+                    "overview": "This is a test reconciliation report generated in SKIP_LLM mode. AI-powered clinical analysis is disabled. Enable LLM integration for full narrative analysis.",
+                    "key_changes": [
+                        "SKIP_LLM mode is enabled - detailed medication change analysis unavailable",
+                        "Set MEDREC_SKIP_LLM=False and configure valid API credentials to enable full AI analysis"
+                    ],
+                    "clinical_significance": "Clinical significance analysis requires AI/LLM integration. The system has successfully extracted and normalized medications using NLP (medSpaCy), but reconciliation logic and narrative generation are stubbed in test mode.",
+                    "recommendations": [
+                        "Configure Azure OpenAI credentials in environment variables",
+                        "Set MEDREC_SKIP_LLM=False to enable full LLM-powered reconciliation",
+                        "Review extracted medications to verify NLP extraction accuracy"
+                    ],
+                    "urgent_actions": []
+                }
+            }
+            import json
+            return json.dumps(stub_response, indent=2)
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -217,7 +247,41 @@ class ModelEngine:
                             "You are precise, evidence-based, and never guess or hallucinate information.")
         
         if self.skip_llm:
-            return "LLM skipped (stub response)."
+            # Return the same stub response as _call_llm for consistency
+            stub_response = {
+                "matched": [],
+                "discrepancies": [],
+                "additions": [],
+                "discontinuations": [],
+                "ambiguities": [],
+                "summary": {
+                    "total_prior_meds": 0,
+                    "total_current_meds": 0,
+                    "matched_count": 0,
+                    "discrepancy_count": 0,
+                    "addition_count": 0,
+                    "discontinuation_count": 0,
+                    "ambiguity_count": 0,
+                    "clinical_notes": "LLM skipped (stub response - SKIP_LLM mode enabled)."
+                },
+                "narrative": {
+                    "overview": "This is a test reconciliation report generated in SKIP_LLM mode. AI-powered clinical analysis is disabled. Enable LLM integration for full narrative analysis.",
+                    "key_changes": [
+                        "SKIP_LLM mode is enabled - detailed medication change analysis unavailable",
+                        "Set MEDREC_SKIP_LLM=False and configure valid API credentials to enable full AI analysis"
+                    ],
+                    "clinical_significance": "Clinical significance analysis requires AI/LLM integration. The system has successfully extracted and normalized medications using NLP (medSpaCy), but reconciliation logic and narrative generation are stubbed in test mode.",
+                    "recommendations": [
+                        "Configure Azure OpenAI credentials in environment variables",
+                        "Set MEDREC_SKIP_LLM=False to enable full LLM-powered reconciliation",
+                        "Review extracted medications to verify NLP extraction accuracy"
+                    ],
+                    "urgent_actions": []
+                }
+            }
+            import json
+            return json.dumps(stub_response, indent=2)
+        
         try:
             response = self.client.chat.completions.create(
                 model=self.model,

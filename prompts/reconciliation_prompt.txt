@@ -115,6 +115,24 @@ Provide your analysis in the following JSON structure. DO NOT include any text o
     "discontinuation_count": 0,
     "ambiguity_count": 0,
     "clinical_notes": "Overall assessment of medication regimen changes and clinical significance"
+  }},
+  "narrative": {{
+    "overview": "A 2-3 sentence overview of the medication reconciliation findings and overall clinical picture",
+    "key_changes": [
+      "First major finding with clinical context (e.g., 'Lisinopril dose doubled from 10mg to 20mg daily, likely due to elevated blood pressure readings')",
+      "Second major finding (e.g., 'Aspirin discontinued 3 weeks ago due to GI upset - consider alternative antiplatelet therapy if indicated')",
+      "Additional findings as needed"
+    ],
+    "clinical_significance": "Analysis of what these changes mean clinically - are they appropriate? Any safety concerns? Therapeutic gaps?",
+    "recommendations": [
+      "Specific actionable recommendation #1 (e.g., 'Verify with patient the reason for aspirin discontinuation and assess if alternative antiplatelet therapy is indicated')",
+      "Specific actionable recommendation #2 (e.g., 'Monitor blood pressure response to increased lisinopril dose at next visit')",
+      "Additional recommendations as needed"
+    ],
+    "urgent_actions": [
+      "Any urgent/immediate actions needed (leave empty array if none)",
+      "Example: 'Clarify insulin glargine dosing - order shows 10 units but patient states taking 20 units'"
+    ]
   }}
 }}
 ```

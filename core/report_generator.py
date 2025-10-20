@@ -42,6 +42,9 @@ class ReportGenerator:
         # Header
         report_sections.append(self._generate_header(reconciliation_result))
         
+        # Clinical Narrative (NEW - highest priority)
+        report_sections.append(self._generate_narrative_section(reconciliation_result))
+        
         # Executive Summary
         report_sections.append(self._generate_summary(reconciliation_result))
         
@@ -150,6 +153,68 @@ class ReportGenerator:
                 {f'<div class="clinical-notes"><strong>Clinical Notes:</strong> {summary.get("clinical_notes", "")}</div>' if summary.get("clinical_notes") else ''}
             </div>
         """
+        
+        # Clinical Narrative Section
+        narrative = reconciliation_result.get('narrative', {})
+        if narrative:
+            overview = narrative.get('overview', '')
+            key_changes = narrative.get('key_changes', [])
+            clinical_significance = narrative.get('clinical_significance', '')
+            recommendations = narrative.get('recommendations', [])
+            urgent_actions = narrative.get('urgent_actions', [])
+            
+            html += """
+            <div class="report-section narrative-section">
+                <h3>📋 Clinical Narrative & Analysis</h3>
+            """
+            
+            if overview:
+                html += f"""
+                <div class="narrative-overview">
+                    <h4>Overview</h4>
+                    <p>{overview}</p>
+                </div>
+                """
+            
+            if key_changes:
+                html += """
+                <div class="narrative-changes">
+                    <h4>Key Medication Changes Identified</h4>
+                    <ol>
+                """
+                for change in key_changes:
+                    html += f"<li>{change}</li>"
+                html += "</ol></div>"
+            
+            if clinical_significance:
+                html += f"""
+                <div class="narrative-significance">
+                    <h4>Clinical Significance</h4>
+                    <p>{clinical_significance}</p>
+                </div>
+                """
+            
+            if recommendations:
+                html += """
+                <div class="narrative-recommendations">
+                    <h4>Recommendations for Clinical Team</h4>
+                    <ol>
+                """
+                for rec in recommendations:
+                    html += f"<li>{rec}</li>"
+                html += "</ol></div>"
+            
+            if urgent_actions:
+                html += """
+                <div class="narrative-urgent">
+                    <h4 style="color: #d32f2f;">⚠️ URGENT ACTIONS REQUIRED</h4>
+                    <ol style="color: #d32f2f; font-weight: bold;">
+                """
+                for action in urgent_actions:
+                    html += f"<li>{action}</li>"
+                html += "</ol></div>"
+            
+            html += "</div>"
         
         # Matched Medications
         if matches:
@@ -298,6 +363,48 @@ class ReportGenerator:
 **Generated:** {timestamp}  
 **System:** VAMedRec v1.0 - VA Medication Reconciliation System
 """
+    
+    def _generate_narrative_section(self, result: Dict) -> str:
+        """Generate clinical narrative section with AI analysis."""
+        narrative = result.get('narrative', {})
+        
+        if not narrative:
+            # Fallback if narrative not provided
+            return ""
+        
+        overview = narrative.get('overview', 'No overview available.')
+        key_changes = narrative.get('key_changes', [])
+        clinical_significance = narrative.get('clinical_significance', 'No clinical significance analysis provided.')
+        recommendations = narrative.get('recommendations', [])
+        urgent_actions = narrative.get('urgent_actions', [])
+        
+        section = """## 📋 Clinical Narrative & Analysis
+
+### Overview
+"""
+        section += f"{overview}\n\n"
+        
+        if key_changes:
+            section += "### Key Medication Changes Identified\n\n"
+            for idx, change in enumerate(key_changes, 1):
+                section += f"{idx}. **{change}**\n\n"
+        
+        section += "### Clinical Significance\n\n"
+        section += f"{clinical_significance}\n\n"
+        
+        if recommendations:
+            section += "### Recommendations for Clinical Team\n\n"
+            for idx, rec in enumerate(recommendations, 1):
+                section += f"{idx}. {rec}\n"
+            section += "\n"
+        
+        if urgent_actions:
+            section += "### ⚠️ URGENT ACTIONS REQUIRED\n\n"
+            for idx, action in enumerate(urgent_actions, 1):
+                section += f"**{idx}. {action}**\n"
+            section += "\n"
+        
+        return section
     
     def _generate_summary(self, result: Dict) -> str:
         """Generate executive summary."""
