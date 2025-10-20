@@ -18,12 +18,20 @@ class ModelEngine:
         self.client = None
         if not self.skip_llm:
             # Initialize OpenAI client - support both Azure and standard OpenAI
+            # Create httpx client without proxy settings to avoid compatibility issues
+            import httpx
+            http_client = httpx.Client(
+                timeout=60.0,
+                follow_redirects=True
+            )
+            
             if config.USE_AZURE and config.AZURE_ENDPOINT:
                 # Azure OpenAI configuration
                 self.client = AzureOpenAI(
                     api_key=config.LLM_API_KEY,
                     azure_endpoint=config.AZURE_ENDPOINT,
-                    api_version="2024-02-15-preview"
+                    api_version="2024-02-15-preview",
+                    http_client=http_client
                 )
             else:
                 # Standard OpenAI configuration
@@ -32,7 +40,8 @@ class ModelEngine:
                     base_url = base_url.rsplit('/chat/completions', 1)[0]
                 self.client = OpenAI(
                     api_key=config.LLM_API_KEY,
-                    base_url=base_url
+                    base_url=base_url,
+                    http_client=http_client
                 )
         else:
             # Provide clear notice in logs when skipping
