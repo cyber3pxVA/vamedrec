@@ -37,21 +37,54 @@ class ClinicalExtractor:
         self.nlp = None
         
         try:
-            # Try to load spaCy model
-            import spacy
-            self.nlp = spacy.load(model_name)
-            logger.info(f"Loaded spaCy model: {model_name}")
+            # Try to load medSpaCy pipeline (includes spaCy + clinical components)
+            import medspacy
+            self.nlp = medspacy.load(model_name=model_name)
+            logger.info(f"Loaded medSpaCy pipeline with model: {model_name}")
+            logger.info(f"Pipeline components: {self.nlp.pipe_names}")
             
-            # Add medSpaCy components
-            self._add_medspacy_components()
+            # Add medication patterns to target matcher
+            self._add_medication_patterns_medspacy()
+            
             self.use_spacy = True
             
         except (ImportError, OSError) as e:
-            logger.warning(f"spaCy/medSpaCy not available: {e}")
+            logger.warning(f"medSpaCy not available: {e}")
             logger.warning("Falling back to regex-based extraction")
             self.use_spacy = False
         
         logger.info("ClinicalExtractor initialized successfully")
+    
+    def _add_medication_patterns_medspacy(self):
+        """Add medication entity patterns to medSpaCy target matcher."""
+        try:
+            from medspacy.ner import TargetRule
+            
+            # Get the target_matcher component
+            target_matcher = self.nlp.get_pipe("medspacy_target_matcher")
+            
+            # Common medication names (expand this list as needed)
+            common_meds = [
+                "metformin", "lisinopril", "aspirin", "atorvastatin", "amlodipine",
+                "losartan", "simvastatin", "omeprazole", "levothyroxine", "albuterol",
+                "gabapentin", "hydrochlorothiazide", "furosemide", "warfarin", "insulin",
+                "prednisone", "tramadol", "ibuprofen", "acetaminophen", "clopidogrel",
+                "carvedilol", "pravastatin", "rosuvastatin", "pantoprazole", "esomeprazole",
+                "montelukast", "sertraline", "escitalopram", "fluoxetine", "duloxetine",
+                "glargine", "glipizide", "metoprolol", "atenolol", "diltiazem"
+            ]
+            
+            # Add patterns for each medication (case-insensitive)
+            for med in common_meds:
+                # Add lowercase version
+                target_matcher.add(TargetRule(med.lower(), "MEDICATION"))
+                # Add capitalized version
+                target_matcher.add(TargetRule(med.capitalize(), "MEDICATION"))
+            
+            logger.info(f"Added {len(common_meds) * 2} medication patterns to target matcher")
+            
+        except Exception as e:
+            logger.warning(f"Could not add medication patterns: {e}")
     
     def _add_medspacy_components(self):
         """Add medSpaCy pipeline components for clinical NLP."""
@@ -277,7 +310,7 @@ class ClinicalExtractor:
                 is_uncertain=is_uncertain,
                 raw_text_snippet=raw_text_snippet,
                 sentence_context=str(sent),
-                extraction_confidence=ent._.get("confidence", 0.8),
+                extraction_confidence=getattr(ent._, "confidence", 0.8),
                 extraction_method="medspacy"
             )
             

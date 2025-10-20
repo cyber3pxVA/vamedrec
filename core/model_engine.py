@@ -12,31 +12,36 @@ import config
 
 class ModelEngine:
     """Manages LLM API calls and prompt engineering."""
-    
+
     def __init__(self):
-        # Initialize OpenAI client - support both Azure and standard OpenAI
-        if config.USE_AZURE and config.AZURE_ENDPOINT:
-            # Azure OpenAI configuration
-            self.client = AzureOpenAI(
-                api_key=config.LLM_API_KEY,
-                azure_endpoint=config.AZURE_ENDPOINT,
-                api_version="2024-02-15-preview"
-            )
+        self.skip_llm = config.SKIP_LLM
+        self.client = None
+        if not self.skip_llm:
+            # Initialize OpenAI client - support both Azure and standard OpenAI
+            if config.USE_AZURE and config.AZURE_ENDPOINT:
+                # Azure OpenAI configuration
+                self.client = AzureOpenAI(
+                    api_key=config.LLM_API_KEY,
+                    azure_endpoint=config.AZURE_ENDPOINT,
+                    api_version="2024-02-15-preview"
+                )
+            else:
+                # Standard OpenAI configuration
+                base_url = config.LLM_ENDPOINT
+                if '/chat/completions' in base_url:
+                    base_url = base_url.rsplit('/chat/completions', 1)[0]
+                self.client = OpenAI(
+                    api_key=config.LLM_API_KEY,
+                    base_url=base_url
+                )
         else:
-            # Standard OpenAI configuration
-            base_url = config.LLM_ENDPOINT
-            if '/chat/completions' in base_url:
-                base_url = base_url.rsplit('/chat/completions', 1)[0]
-            
-            self.client = OpenAI(
-                api_key=config.LLM_API_KEY,
-                base_url=base_url
-            )
-        
+            # Provide clear notice in logs when skipping
+            print("[ModelEngine] SKIP_LLM=True - using stubbed responses for reconciliation.")
+
         self.model = config.LLM_MODEL
         self.temperature = config.LLM_TEMPERATURE
         self.max_tokens = config.LLM_MAX_TOKENS
-        
+
         # Load prompt templates
         self.simple_prompt_template = self._load_prompt("simple_prompt.txt")
         self.comprehensive_prompt_template = self._load_prompt("comprehensive_prompt.txt")
@@ -169,6 +174,11 @@ class ModelEngine:
         Returns:
             LLM response text
         """
+        if self.skip_llm:
+            # Return deterministic stub for testing environments
+            return (
+                "{\n  \"matched\": [],\n  \"discrepancies\": [],\n  \"additions\": [],\n  \"discontinuations\": [],\n  \"ambiguities\": [],\n  \"summary\": {\n    \"total_prior_meds\": 0,\n    \"total_current_meds\": 0,\n    \"matched_count\": 0,\n    \"discrepancy_count\": 0,\n    \"addition_count\": 0,\n    \"discontinuation_count\": 0,\n    \"ambiguity_count\": 0,\n    \"clinical_notes\": \"LLM skipped (stub response).\"\n  }\n}"
+            )
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -186,9 +196,7 @@ class ModelEngine:
                 temperature=self.temperature,
                 max_tokens=self.max_tokens,
             )
-            
             return response.choices[0].message.content
-        
         except Exception as e:
             raise RuntimeError(f"LLM API call failed: {str(e)}")
     
@@ -208,25 +216,19 @@ class ModelEngine:
             system_message = ("You are a clinical pharmacist expert in medication reconciliation. "
                             "You are precise, evidence-based, and never guess or hallucinate information.")
         
+        if self.skip_llm:
+            return "LLM skipped (stub response)."
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {
-                        "role": "system",
-                        "content": system_message
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": prompt}
                 ],
                 temperature=self.temperature,
                 max_tokens=self.max_tokens,
             )
-            
             return response.choices[0].message.content
-        
         except Exception as e:
             raise RuntimeError(f"LLM API call failed: {str(e)}")
     

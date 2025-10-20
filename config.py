@@ -19,6 +19,7 @@ LLM_ENDPOINT: str = os.getenv("LLM_ENDPOINT", os.getenv("AZURE_ENDPOINT", "https
 LLM_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
 LLM_MODEL: str = os.getenv("MODEL_NAME", os.getenv("LLM_MODEL", "gpt-4o"))
 USE_AZURE: bool = bool(os.getenv("AZURE_ENDPOINT", ""))
+SKIP_LLM: bool = os.getenv("MEDREC_SKIP_LLM", "False").lower() == "true"
 
 # LLM parameters
 LLM_TEMPERATURE: float = 0.1  # Low temperature for consistency
@@ -132,11 +133,14 @@ FLASK_DEBUG: bool = os.getenv("FLASK_DEBUG", "False").lower() == "true"
 
 def validate_config() -> None:
     """Validate required configuration is present."""
-    if not LLM_API_KEY:
-        raise ValueError(
-            "OPENAI_API_KEY environment variable is required. "
-            "Set it in .env file or as environment variable."
-        )
+    if SKIP_LLM:
+        print("⚠️ SKIP_LLM enabled - LLM calls will be stubbed. Set MEDREC_SKIP_LLM=False to enable real API calls.")
+    else:
+        if not LLM_API_KEY:
+            raise ValueError(
+                "OPENAI_API_KEY environment variable is required unless MEDREC_SKIP_LLM=True. "
+                "Set it in .env file or as environment variable."
+            )
     print(f"✓ Configuration loaded successfully")
     print(f"  - LLM Model: {LLM_MODEL}")
     print(f"  - LLM Endpoint: {LLM_ENDPOINT}")
